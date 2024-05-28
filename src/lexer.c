@@ -1,20 +1,17 @@
-#include <stdio.h>
 #include <ctype.h>
 #include <string.h>
 #include <stdbool.h>
-#include <stdbool.h>
+#include <stdio.h>
 #include "lexer.h"
 
-const char *keywords[] = {
-    "ἀκέραιος",
+const Token keywords[] = {
+    {KEYWORD, "ἀκέραιος", 17},
 };
 
-
-bool isGreekCharacter(unsigned char c) {
-    return (c >= 0x0370 && c <= 0x03FF);
+bool isGreekCharacter(char c) {
+    unsigned char uc = (unsigned char)c;
+    return (uc >= 0x370 && uc <= 0x3FF);
 }
-
-
 
 void lexer_init(Lexer *l, const char *content, size_t content_len) {
     l->content = content;
@@ -23,7 +20,7 @@ void lexer_init(Lexer *l, const char *content, size_t content_len) {
     l->line = 1;
     l->cursor = 0;
     l->character = 0;
-  
+
     lexer_next_char(l); 
 }
 
@@ -31,7 +28,7 @@ char lexer_next_char(Lexer *l) {
     if (l->pos >= l->content_len) {
         l->character = EOF;
     } else {
-        l->character = l->content[l->pos++];  
+        l->character = l->content[l->pos++];
         l->cursor++;
     }
     return l->character;
@@ -45,54 +42,46 @@ char lexer_peek_char(const Lexer *l) {
 }
 
 void skip_whitespace(Lexer *l) {
-    while (isspace(l->character) && l->character != EOF) {
+    while (isspace((unsigned char)l->character) && l->character != EOF) {
         lexer_next_char(l);
     }
 }
-
-
-Token *generate_int(Lexer *l) {
-    Token *token = malloc(sizeof(Token));
-    token->text_len = malloc(sizeof(int));
-    token->text_len = l->line; 
-    token->type = INTEGER;
-    char *value = malloc(sizeof(char) * 8);
-    int value_index = 0;
-    while (isGreekCharacter(l->character) && l->character != '\0') {
-        value[value_index++] = l->character;
-        lexer_next_char(l);
-    }
-    value[value_index] = '\0';
-    token->text = value;
-    return token;
-}
-
-
-
 
 Token lexer_next_token(Lexer *l) {
     skip_whitespace(l);
     
     Token token;
-   
-    if (isdigit(l->character)) {
+    token.text = NULL;
+    token.text_len = 0;
+    
+        for (size_t i = 0; i < sizeof(keywords) / sizeof(keywords[0]); ++i) {
+        if (strncmp(&l->content[l->pos - 1], keywords[i].text, keywords[i].text_len) == 0) {
+            token = keywords[i];
+            l->pos += keywords[i].text_len - 1;
+                        lexer_next_char(l); // Move past the keyword
+
+            return token;
+        }
+    }
+    
+    if (isdigit((unsigned char)l->character)) {
         token.type = INTEGER;
         token.text = &l->content[l->pos - 1];
         token.text_len = 1;
-        while (isdigit(lexer_peek_char(l))) {
+        while (isdigit((unsigned char)lexer_peek_char(l))) {
             lexer_next_char(l);
             token.text_len++;
         }
-        lexer_next_char(l);  
-    } else if (isalpha(l->character) || isGreekCharacter(l->character)) {
+        lexer_next_char(l);
+    } else if (isalpha((unsigned char)l->character) || isGreekCharacter(l->character)) {
         token.type = IDENTIFIER;
         token.text = &l->content[l->pos - 1];
         token.text_len = 1;
-        while (isalnum(lexer_peek_char(l)) || isGreekCharacter(lexer_peek_char(l))) {
+        while (isalnum((unsigned char)lexer_peek_char(l)) || isGreekCharacter(lexer_peek_char(l))) {
             lexer_next_char(l);
             token.text_len++;
         }
-        lexer_next_char(l);  
+        lexer_next_char(l);
     } else {
         switch (l->character) {
             case '=':
@@ -109,7 +98,7 @@ Token lexer_next_token(Lexer *l) {
                 break;
             case ':':
                 token.type = VAR_TYPE;
-                token.text = ":";
+                token.type = ':';
                 token.text_len = 1;
                 lexer_next_char(l);
                 break;
@@ -118,21 +107,14 @@ Token lexer_next_token(Lexer *l) {
                 token.text = "EOF";
                 token.text_len = 3;
                 break;
-                
-          default:
-              printf("Unknown character: %c\n", l->character);
-              token.type = UNKNOWN;
-              token.text = &l->content[l->pos - 1];
-              token.text_len = 1;
-              lexer_next_char(l);
-              break;
+            default:
+                token.type = UNKNOWN;
+                token.text = &l->content[l->pos - 1];
+                token.text_len = 1;
+                lexer_next_char(l);
+                break;
         }
     }
-    
-    if (token.type == IDENTIFIER && strncmp(token.text, "ακ", token.text_len) == 0) {
-        return *generate_int(l);
-    }
-    
     return token;
 }
 
