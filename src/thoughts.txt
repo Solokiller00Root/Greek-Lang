@@ -1,0 +1,15 @@
+
+
+So basically our lexer is going to have 
+a structure called Type which is going
+to have the types of each token generated
+
+types: 
+
+
+
+
+
+
+
+
