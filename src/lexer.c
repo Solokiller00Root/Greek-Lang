@@ -5,7 +5,11 @@
 #include "lexer.h"
 
 const Token keywords[] = {
-    {KEYWORD, "ἀκέραιος", 17},
+    {INTEGER, "ἀκέραιος", 17},
+    {STRING, "χαρακτήρ", 16},
+    {BOOL, "ἀπόλυτος", 17},
+    {IF, "ἐάν", 7},
+    {FOR, "ἕνεκα", 11}
 };
 
 bool isGreekCharacter(char c) {
@@ -58,7 +62,7 @@ Token lexer_next_token(Lexer *l) {
         if (strncmp(&l->content[l->pos - 1], keywords[i].text, keywords[i].text_len) == 0) {
             token = keywords[i];
             l->pos += keywords[i].text_len - 1;
-                        lexer_next_char(l); // Move past the keyword
+            lexer_next_char(l); 
 
             return token;
         }
@@ -77,7 +81,7 @@ Token lexer_next_token(Lexer *l) {
         token.type = IDENTIFIER;
         token.text = &l->content[l->pos - 1];
         token.text_len = 1;
-        while (isalnum((unsigned char)lexer_peek_char(l)) || isGreekCharacter(lexer_peek_char(l))) {
+        while (isalnum(lexer_peek_char(l)) || isGreekCharacter(lexer_peek_char(l))) {
             lexer_next_char(l);
             token.text_len++;
         }
@@ -98,7 +102,43 @@ Token lexer_next_token(Lexer *l) {
                 break;
             case ':':
                 token.type = VAR_TYPE;
-                token.type = ':';
+                token.text = ":";
+                token.text_len = 1;
+                lexer_next_char(l);
+                break;
+            case '+':
+                token.type = PLUS;
+                token.text = "+";
+                token.text_len = 1;
+                lexer_next_char(l);
+                break;
+             case '<':
+                token.type = LESS_THAN_EQ;
+                token.text = "<";
+                token.text_len = 1;
+                lexer_next_char(l);
+                break;
+            case '(':
+                token.type = LPAREN;
+                token.text = "(";
+                token.text_len = 1;
+                lexer_next_char(l);
+                break;
+            case ')':
+                token.type = RPAREN;
+                token.text = ")";
+                token.text_len = 1;
+                lexer_next_char(l);
+                break;
+            case '{':
+                token.type = LBRACE;
+                token.text = "{";
+                token.text_len = 1;
+                lexer_next_char(l);
+                break;
+            case '}':
+                token.type = RBRACE;
+                token.text = "}";
                 token.text_len = 1;
                 lexer_next_char(l);
                 break;
@@ -169,8 +209,19 @@ const char *get_token_strings(Token_type type) {
         case IDENTIFIER: return "IDENTIFIER";
         case VAR_TYPE: return "VAR_TYPE";
         case KEYWORD: return "KEYWORD";
+        case STRING: return "STRING";
+        case BOOL: return "BOOL";
+        case IF: return "IF";
+        case FOR: return "FOR";
         case EQUALS: return "EQUALS";
+        case PLUS: return "PLUS";
+        case LESS_THAN_EQ: return "LESS_THAN_EQ";
+        
         case SEMICOLON: return "SEMICOLON";
+        case LBRACE: return "LBRACE";
+        case RBRACE: return "RBRACE";
+        case LPAREN: return "LPAREN";
+        case RPAREN: return "RPAREN";
         case UNKNOWN: return "UNKNOWN";
         case END: return "END";
         default: return "UNKNOWN";
