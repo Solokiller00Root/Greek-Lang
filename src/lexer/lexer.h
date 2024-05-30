@@ -10,11 +10,13 @@ typedef enum {
 
 typedef enum {
     INTEGER,
-    VAR_TYPE,
+    INTEGER_LITERAL,
     IDENTIFIER,
     KEYWORD,
     STRING,
+    STRING_LITERAL,
     BOOL,
+    BOOL_LITERAL,
     PLUS,
     IF,
     FOR,
@@ -25,6 +27,8 @@ typedef enum {
     RPAREN,
     EQUALS,
     SEMICOLON,
+    COLON,
+    ASIGN,
     UNKNOWN,
     END
 } Token_type;

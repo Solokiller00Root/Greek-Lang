@@ -1,4 +1,4 @@
 set -xe
-cc lexer.c main.c -o main -Wall -Wextra
+cc ./lexer/lexer.c main.c -o main -Wall -Wextra
 
 

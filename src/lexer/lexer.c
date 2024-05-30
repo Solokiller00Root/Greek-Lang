@@ -68,20 +68,20 @@ Token lexer_next_token(Lexer *l) {
         }
     }
     
-    if (isdigit((unsigned char)l->character)) {
-        token.type = INTEGER;
+    if (isdigit(l->character)) {
+        token.type = INTEGER_LITERAL;
         token.text = &l->content[l->pos - 1];
         token.text_len = 1;
-        while (isdigit((unsigned char)lexer_peek_char(l))) {
+        while (isdigit(lexer_peek_char(l))) {
             lexer_next_char(l);
             token.text_len++;
         }
         lexer_next_char(l);
-    } else if (isalpha((unsigned char)l->character) || isGreekCharacter(l->character)) {
+    } else if (isalpha(l->character)) {
         token.type = IDENTIFIER;
         token.text = &l->content[l->pos - 1];
         token.text_len = 1;
-        while (isalnum(lexer_peek_char(l)) || isGreekCharacter(lexer_peek_char(l))) {
+        while (isalnum(lexer_peek_char(l))) {
             lexer_next_char(l);
             token.text_len++;
         }
@@ -100,23 +100,25 @@ Token lexer_next_token(Lexer *l) {
                 token.text_len = 1;
                 lexer_next_char(l);
                 break;
-            case ':':
-                token.type = VAR_TYPE;
-                token.text = ":";
-                token.text_len = 1;
-                lexer_next_char(l);
-                break;
-            case '+':
+           case '+':
                 token.type = PLUS;
                 token.text = "+";
                 token.text_len = 1;
                 lexer_next_char(l);
                 break;
              case '<':
-                token.type = LESS_THAN_EQ;
-                token.text = "<";
-                token.text_len = 1;
-                lexer_next_char(l);
+                if (lexer_peek_char(l) == '-') {
+                    lexer_next_char(l); // Consume '-'
+                    token.type = ASIGN;
+                    token.text = "<-";
+                    token.text_len = 2;
+                    lexer_next_char(l); 
+                } else {
+                    token.type = LESS_THAN_EQ;
+                    token.text = "<";
+                    token.text_len = 1;
+                    lexer_next_char(l);
+                }
                 break;
             case '(':
                 token.type = LPAREN;
@@ -139,6 +141,12 @@ Token lexer_next_token(Lexer *l) {
             case '}':
                 token.type = RBRACE;
                 token.text = "}";
+                token.text_len = 1;
+                lexer_next_char(l);
+                break;
+            case ':':
+                token.type = COLON;
+                token.text = ":";
                 token.text_len = 1;
                 lexer_next_char(l);
                 break;
@@ -207,7 +215,6 @@ const char *get_token_strings(Token_type type) {
     switch (type) {
         case INTEGER: return "INTEGER";
         case IDENTIFIER: return "IDENTIFIER";
-        case VAR_TYPE: return "VAR_TYPE";
         case KEYWORD: return "KEYWORD";
         case STRING: return "STRING";
         case BOOL: return "BOOL";
@@ -216,7 +223,9 @@ const char *get_token_strings(Token_type type) {
         case EQUALS: return "EQUALS";
         case PLUS: return "PLUS";
         case LESS_THAN_EQ: return "LESS_THAN_EQ";
-        
+        case INTEGER_LITERAL: return "INTEGER_LITERAL";
+        case COLON: return "COLON";
+        case ASIGN: return "ASIGN";
         case SEMICOLON: return "SEMICOLON";
         case LBRACE: return "LBRACE";
         case RBRACE: return "RBRACE";
