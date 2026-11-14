@@ -18,7 +18,7 @@ bool isGreekCharacter(char c) {
 }
 
 void lexer_init(Lexer *l, const char *content, size_t content_len) {
-    l->content = content;
+    l->content` = content;
     l->content_len = content_len;
     l->pos = 0;
     l->line = 1;
