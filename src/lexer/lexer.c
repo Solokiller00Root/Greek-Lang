@@ -3,26 +3,27 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include "lexer.h"
+#include <stdint.h> 
 
 const Token keywords[] = {
     {INTEGER, "ἀκέραιος", 17},
     {STRING, "χαρακτήρ", 16},
-    {BOOL, "ἀπόλυτος", 17},
+    {FLOAT, "ἀπόλυτος", 17},
     {IF, "ἐάν", 7},
     {FOR, "ἕνεκα", 11}
 };
 
-bool isGreekCharacter(char c) {
-    unsigned char uc = (unsigned char)c;
-    return (uc >= 0x370 && uc <= 0x3FF);
+bool isGreekCharacter(uint32_t codepoint) {
+    return codepoint >= 0x0370 && codepoint <= 0x03FF;
 }
 
 void lexer_init(Lexer *l, const char *content, size_t content_len) {
-    l->content` = content;
+    l->content = content;
     l->content_len = content_len;
     l->pos = 0;
     l->line = 1;
     l->cursor = 0;
+    l->token_count =0;
     l->character = 0;
 
     lexer_next_char(l); 
@@ -192,12 +193,14 @@ Lexer_Results lexer_tokenize(const char *filename) {
     Token token;
     do {
         token = lexer_next_token(&lexer);
+        lexer.token_count++;
         printf("Token: %s, Text: %.*s\n",
                get_token_strings(token.type),
                (int)token.text_len,
                token.text);
+        printf("Text_len : %d\n", token.text_len);       
     } while (token.type != END);
-
+    printf("%ld\n", lexer.token_count);
     free(content);
     return TOKEN_OK;
 }
@@ -217,6 +220,7 @@ const char *get_token_strings(Token_type type) {
         case IDENTIFIER: return "IDENTIFIER";
         case KEYWORD: return "KEYWORD";
         case STRING: return "STRING";
+        case FLOAT: return "FLOAT";
         case BOOL: return "BOOL";
         case IF: return "IF";
         case FOR: return "FOR";

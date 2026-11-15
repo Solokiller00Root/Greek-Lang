@@ -11,6 +11,8 @@ typedef enum {
 typedef enum {
     INTEGER,
     INTEGER_LITERAL,
+    FLOAT,
+    FLOAT_LITERAL,
     IDENTIFIER,
     KEYWORD,
     STRING,
@@ -47,6 +49,7 @@ typedef struct {
     size_t pos;
     size_t line;
     size_t cursor;
+    size_t token_count;
     char character;
 } Lexer;
 
